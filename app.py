@@ -10,6 +10,11 @@ def fetch_marka_value(url):
         response = requests.get(url)
         response.raise_for_status()
         soup = BeautifulSoup(response.content, 'html.parser')
+
+        # Debug: Print the HTML content
+        html_content = soup.prettify()
+        print(html_content)
+
         marka_span = soup.find('span', string='Marka:')
         if marka_span:
             marka_value = marka_span.find_next_sibling(string=True).strip()

@@ -45,4 +45,4 @@ webdriver-manager==4.0.1
 Werkzeug==3.0.3
 wheel==0.43.0
 wsproto==1.2.0
-gunicorn
+gunicorn==22.0.0

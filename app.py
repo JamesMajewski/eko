@@ -1,3 +1,4 @@
+import os
 from flask import Flask, render_template, request, jsonify
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -7,20 +8,20 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
 import requests
-import concurrent.futures
 
 app = Flask(__name__)
 
-# Initialize the Selenium WebDriver once per session
-service = Service(ChromeDriverManager().install())
-options = webdriver.ChromeOptions()
-options.add_argument('--headless')  # Run in headless mode
-options.add_argument('--no-sandbox')
-options.add_argument('--disable-dev-shm-usage')
-driver = webdriver.Chrome(service=service, options=options)
+chrome_options = webdriver.ChromeOptions()
+chrome_options.add_argument("--headless")
+chrome_options.add_argument("--no-sandbox")
+chrome_options.add_argument("--disable-dev-shm-usage")
+chrome_options.binary_location = os.environ.get("CHROME_BIN")
 
 def fetch_marka_value(url):
+    driver = None
     try:
+        service = Service(ChromeDriverManager().install())
+        driver = webdriver.Chrome(service=service, options=chrome_options)
         driver.get(url)
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.ID, "root"))
@@ -36,6 +37,9 @@ def fetch_marka_value(url):
     except Exception as e:
         print(f"Error fetching marka value: {e}")
         return str(e)
+    finally:
+        if driver:
+            driver.quit()
 
 def fetch_good_on_you_data(brand_name):
     try:
@@ -80,7 +84,4 @@ def fetch_all_data():
     return jsonify(marka_value="Invalid URL", segments=[])
 
 if __name__ == '__main__':
-    try:
-        app.run(debug=True, port=5001)
-    finally:
-        driver.quit()  # Ensure the driver is quit when the Flask app shuts down
+    app.run(debug=True, port=5000)

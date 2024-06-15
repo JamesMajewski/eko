@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barcode Scanner</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+    <style>
+        #interactive {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        #interactive video {
+            width: 100%;
+        }
+        .drawingBuffer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+        #codeDisplay {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border: 2px solid black;
+            border-radius: 10px;
+            z-index: 1000;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        #codeDisplay .close-btn {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        #ratings {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="interactive" class="viewport"></div>
+    <div id="codeDisplay">
+        <span class="close-btn" onclick="closeCodeDisplay()">x</span>
+        <p id="barcodeText"></p>
+        <p id="markaText"></p>
+        <div id="ratings"></div>
+    </div>
+    <script>
+        let isScanning = true;
+
+        function startScanner() {
+            Quagga.init({
+                inputStream: {
+                    name: "Live",
+                    type: "LiveStream",
+                    target: document.querySelector('#interactive')
+                },
+                decoder: {
+                    readers: [
+                        "ean_reader"       // Only EAN-13 reader
+                    ]
+                }
+            }, function(err) {
+                if (err) {
+                    console.log(err);
+                    return;
+                }
+                console.log("Initialization finished. Ready to start");
+                Quagga.start();
+                isScanning = true;
+            });
+
+            Quagga.onDetected(async function(data) {
+                if (!isScanning) return;
+                isScanning = false;
+
+                var code = data.codeResult.code;
+                console.log("Detected Code:", code);
+
+                // Validate the barcode using EAN-13 checksum
+                if (validateEAN13(code)) {
+                    let result = await fetchAllData(`https://www.eprodukty.gs1.pl/catalog/${code}`);
+                    displayCode(code, result.marka_value, result.segments);
+                } else {
+                    console.log("Invalid EAN-13 Code detected.");
+                    isScanning = true;
+                }
+            });
+        }
+
+        function stopScanner() {
+            if (Quagga) {
+                Quagga.stop();
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            startScanner();
+        });
+
+        function validateEAN13(code) {
+            if (code.length !== 13) {
+                return false;
+            }
+            var sum = 0;
+            for (var i = 0; i < 12; i++) {
+                var digit = parseInt(code[i], 10);
+                if (i % 2 === 0) {
+                    sum += digit;
+                } else {
+                    sum += digit * 3;
+                }
+            }
+            var checksum = (10 - (sum % 10)) % 10;
+            return checksum === parseInt(code[12], 10);
+        }
+
+        async function fetchAllData(url) {
+            const response = await fetch(`/fetch-all-data?url=${encodeURIComponent(url)}`);
+            const data = await response.json();
+            return data;
+        }
+
+        function displayCode(code, markaValue, ratingsSegments) {
+            document.getElementById('barcodeText').innerText = 'Scanned EAN-13 Code: ' + code;
+            document.getElementById('markaText').innerText = 'Marka Value: ' + markaValue;
+
+            const ratingsDiv = document.getElementById('ratings');
+            ratingsDiv.innerHTML = '';  // Clear previous ratings
+            ratingsSegments.forEach(segment => {
+                const p = document.createElement('p');
+                p.innerText = segment;
+                ratingsDiv.appendChild(p);
+            });
+
+            document.getElementById('codeDisplay').style.display = 'block';
+            stopScanner();
+        }
+
+        window.closeCodeDisplay = function() {
+            document.getElementById('codeDisplay').style.display = 'none';
+            startScanner();  // Restart Quagga when the display is closed
+        }
+    </script>
+</body>
+</html>

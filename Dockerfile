@@ -10,7 +10,7 @@ COPY . /app
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install Playwright browsers
+# Install Playwright and its dependencies
 RUN apt-get update && apt-get install -y wget gnupg && \
     wget -qO- https://deb.nodesource.com/setup_14.x | bash - && \
     apt-get install -y nodejs && \

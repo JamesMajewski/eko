@@ -3,5 +3,4 @@ services:
     name: your-service-name
     env: docker
     dockerfilePath: ./Dockerfile
-    buildCommand: "./install_playwright.sh"
     startCommand: "gunicorn app:app --bind 0.0.0.0:5000"

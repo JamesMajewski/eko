@@ -7,7 +7,7 @@ WORKDIR /app
 # Copy the current directory contents into the container at /app
 COPY . /app
 
-# Install system dependencies for Playwright and requests-html
+# Install system dependencies for Selenium and ChromeDriver
 RUN apt-get update && apt-get install -y \
     wget \
     gnupg \
@@ -27,15 +27,12 @@ RUN apt-get update && apt-get install -y \
     xdg-utils \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Node.js
-RUN wget -qO- https://deb.nodesource.com/setup_14.x | bash - && \
-    apt-get install -y nodejs
+# Install Chrome and ChromeDriver
+COPY install_chromedriver.sh /install_chromedriver.sh
+RUN chmod +x /install_chromedriver.sh && /install_chromedriver.sh
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
-
-# Install Playwright and its dependencies
-RUN npm install -g playwright && playwright install --with-deps
 
 # Make port 5000 available to the world outside this container
 EXPOSE 5000

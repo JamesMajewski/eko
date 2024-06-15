@@ -15,12 +15,23 @@ chrome_options = webdriver.ChromeOptions()
 chrome_options.add_argument("--headless")
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-dev-shm-usage")
-chrome_options.binary_location = os.environ.get("CHROME_BIN")
+
+chrome_bin = os.environ.get("CHROME_BIN")
+if chrome_bin:
+    chrome_options.binary_location = chrome_bin
+else:
+    print("CHROME_BIN environment variable is not set")
+
+chrome_driver = os.environ.get("CHROME_DRIVER")
+if not chrome_driver:
+    print("CHROME_DRIVER environment variable is not set")
 
 def fetch_marka_value(url):
     driver = None
     try:
-        service = Service(ChromeDriverManager().install())
+        print(f"Using Chrome binary at: {chrome_bin}")
+        print(f"Using ChromeDriver at: {chrome_driver}")
+        service = Service(chrome_driver)
         driver = webdriver.Chrome(service=service, options=chrome_options)
         driver.get(url)
         WebDriverWait(driver, 10).until(

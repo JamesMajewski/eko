@@ -22,16 +22,16 @@ if chrome_bin:
 else:
     print("CHROME_BIN environment variable is not set")
 
-chrome_driver = os.environ.get("CHROME_DRIVER")
-if not chrome_driver:
+chrome_driver_path = os.environ.get("CHROME_DRIVER")
+if not chrome_driver_path:
     print("CHROME_DRIVER environment variable is not set")
 
 def fetch_marka_value(url):
     driver = None
     try:
         print(f"Using Chrome binary at: {chrome_bin}")
-        print(f"Using ChromeDriver at: {chrome_driver}")
-        service = Service(chrome_driver)
+        print(f"Using ChromeDriver at: {chrome_driver_path}")
+        service = Service(chrome_driver_path)
         driver = webdriver.Chrome(service=service, options=chrome_options)
         driver.get(url)
         WebDriverWait(driver, 10).until(

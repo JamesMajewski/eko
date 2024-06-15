@@ -7,16 +7,17 @@ WORKDIR /app
 # Copy the current directory contents into the container at /app
 COPY . /app
 
-# Install any needed packages specified in requirements.txt
+# Install system dependencies
+RUN apt-get update && apt-get install -y wget gnupg libglib2.0-0 libnss3 libgdk-pixbuf2.0-0 libgtk-3-0 libx11-xcb1 libxcomposite1 libxdamage1 libxrandr2 libgbm1 libasound2 libpangocairo-1.0-0 libxshmfence1
+
+# Install Node.js
+RUN wget -qO- https://deb.nodesource.com/setup_14.x | bash - && apt-get install -y nodejs
+
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Install Playwright and its dependencies
-RUN apt-get update && apt-get install -y wget gnupg && \
-    wget -qO- https://deb.nodesource.com/setup_14.x | bash - && \
-    apt-get install -y nodejs && \
-    npm install -g npm@latest && \
-    npm install -g playwright && \
-    playwright install --with-deps
+RUN npm install -g playwright && playwright install --with-deps
 
 # Make port 5000 available to the world outside this container
 EXPOSE 5000

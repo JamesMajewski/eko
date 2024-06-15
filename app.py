@@ -7,7 +7,6 @@ from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
 
 app = Flask(__name__)
 
@@ -17,7 +16,7 @@ def fetch_marka_value(url):
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
     
-    service = ChromeService(executable_path=ChromeDriverManager().install())
+    service = ChromeService(executable_path='/usr/local/bin/chromedriver')
     driver = webdriver.Chrome(service=service, options=options)
 
     try:

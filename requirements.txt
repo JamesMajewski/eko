@@ -31,6 +31,8 @@ python-dotenv==1.0.1
 pytz==2024.1
 requests==2.32.3
 requests-html
+lxml
+lxml_html_clean
 selenium==4.21.0
 setuptools==70.0.0
 six==1.16.0

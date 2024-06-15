@@ -1,6 +1,7 @@
 services:
   - type: web
     name: your-service-name
-    env: python
-    buildCommand: "./install_playwright.sh"
-    startCommand: "gunicorn app:app"
+    env: docker
+    dockerfilePath: ./Dockerfile
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn app:app --bind 0.0.0.0:5000"

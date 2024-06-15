@@ -1,42 +1,15 @@
 import os
 from flask import Flask, render_template, request, jsonify
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 import requests
 
 app = Flask(__name__)
 
-chrome_options = webdriver.ChromeOptions()
-chrome_options.add_argument("--headless")
-chrome_options.add_argument("--no-sandbox")
-chrome_options.add_argument("--disable-dev-shm-usage")
-
-chrome_bin = os.environ.get("CHROME_BIN", "/usr/bin/google-chrome")
-chrome_driver_path = os.environ.get("CHROME_DRIVER", "/usr/lib/chromium-browser/chromedriver")
-
-if not chrome_bin:
-    print("CHROME_BIN environment variable is not set")
-
-if not chrome_driver_path:
-    print("CHROME_DRIVER environment variable is not set")
-
 def fetch_marka_value(url):
-    driver = None
     try:
-        print(f"Using Chrome binary at: {chrome_bin}")
-        print(f"Using ChromeDriver at: {chrome_driver_path}")
-        service = Service(chrome_driver_path)
-        driver = webdriver.Chrome(service=service, options=chrome_options)
-        driver.get(url)
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.ID, "root"))
-        )
-        page_source = driver.page_source
-        soup = BeautifulSoup(page_source, 'html.parser')
+        response = requests.get(url)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.content, 'html.parser')
         marka_span = soup.find('span', string='Marka:')
         if marka_span:
             marka_value = marka_span.find_next_sibling(string=True).strip()
@@ -46,9 +19,6 @@ def fetch_marka_value(url):
     except Exception as e:
         print(f"Error fetching marka value: {e}")
         return str(e)
-    finally:
-        if driver:
-            driver.quit()
 
 def fetch_good_on_you_data(brand_name):
     try:

@@ -25,6 +25,8 @@ else:
 chrome_driver_path = os.environ.get("CHROME_DRIVER")
 if not chrome_driver_path:
     print("CHROME_DRIVER environment variable is not set")
+else:
+    print(f"Using ChromeDriver at: {chrome_driver_path}")
 
 def fetch_marka_value(url):
     driver = None

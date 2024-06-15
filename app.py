@@ -5,7 +5,6 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
 import requests
 
@@ -16,17 +15,14 @@ chrome_options.add_argument("--headless")
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-dev-shm-usage")
 
-chrome_bin = os.environ.get("CHROME_BIN")
-if chrome_bin:
-    chrome_options.binary_location = chrome_bin
-else:
+chrome_bin = os.environ.get("CHROME_BIN", "/usr/bin/google-chrome")
+chrome_driver_path = os.environ.get("CHROME_DRIVER", "/usr/lib/chromium-browser/chromedriver")
+
+if not chrome_bin:
     print("CHROME_BIN environment variable is not set")
 
-chrome_driver_path = os.environ.get("CHROME_DRIVER")
 if not chrome_driver_path:
     print("CHROME_DRIVER environment variable is not set")
-else:
-    print(f"Using ChromeDriver at: {chrome_driver_path}")
 
 def fetch_marka_value(url):
     driver = None

@@ -2,19 +2,22 @@ import os
 from flask import Flask, render_template, request, jsonify
 from bs4 import BeautifulSoup
 import requests
+from playwright.sync_api import sync_playwright
 
 app = Flask(__name__)
 
 def fetch_marka_value(url):
     try:
-        response = requests.get(url)
-        response.raise_for_status()
-        soup = BeautifulSoup(response.content, 'html.parser')
-
-        # Debug: Print the HTML content
-        html_content = soup.prettify()
-        print(html_content)
-
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            page = browser.new_page()
+            page.goto(url)
+            # Wait for the content to load
+            page.wait_for_selector('span')
+            content = page.content()
+            browser.close()
+        
+        soup = BeautifulSoup(content, 'html.parser')
         marka_span = soup.find('span', string='Marka:')
         if marka_span:
             marka_value = marka_span.find_next_sibling(string=True).strip()

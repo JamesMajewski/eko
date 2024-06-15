@@ -2,5 +2,5 @@ services:
   - type: web
     name: your-service-name
     env: python
-    buildCommand: "pip install -r requirements.txt"
+    buildCommand: "./install_playwright.sh"
     startCommand: "gunicorn app:app"
